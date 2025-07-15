@@ -17,15 +17,19 @@ cnx = st.connection("snowflake")
 session = cnx.session()
 
 # Get fruit options including SEARCH_ON
-fruit_df = session.table("smoothies.public.fruit_options").select(
+snowpark_df = session.table("smoothies.public.fruit_options").select(
     col('FRUIT_NAME'), col('SEARCH_ON')
-).to_pandas()
+)
 
-# Optional: Debugging - show the DataFrame and stop the app
-st.dataframe(fruit_df)
-st.stop()
+# Convert to Pandas DataFrame
+pd_df = snowpark_df.to_pandas()
 
-fruit_list = fruit_df['FRUIT_NAME'].tolist()
+# Optional: Show the full DataFrame for debugging
+# st.dataframe(pd_df)
+# st.stop()
+
+# Create fruit list for multiselect
+fruit_list = pd_df['FRUIT_NAME'].tolist()
 
 # Multiselect for ingredients
 ingredients_list = st.multiselect(
@@ -40,12 +44,14 @@ if ingredients_list:
     st.write("Ingredients selected:", ingredients_string)
 
     for fruit_chosen in ingredients_list:
-        search_value = fruit_df.loc[fruit_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].values[0]
+        # Get the corresponding SEARCH_ON value
+        search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
+        st.write('The search value for', fruit_chosen, 'is', search_on + '.')
 
         st.subheader(f"{fruit_chosen} Nutrition Information")
 
         try:
-            response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{search_value.lower()}", timeout=5)
+            response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{search_on.lower()}", timeout=5)
             if response.status_code == 200:
                 st.dataframe(data=response.json(), use_container_width=True)
             else:
