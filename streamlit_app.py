@@ -1,8 +1,8 @@
-
 # Import python packages
 import streamlit as st
 import requests
 from snowflake.snowpark.functions import col
+import pandas as pd
 
 # App title and instructions
 st.title("Customize Your SMoothie :cup_with_straw:")
@@ -20,6 +20,10 @@ session = cnx.session()
 fruit_df = session.table("smoothies.public.fruit_options").select(
     col('FRUIT_NAME'), col('SEARCH_ON')
 ).to_pandas()
+
+# Optional: Debugging - show the DataFrame and stop the app
+st.dataframe(fruit_df)
+st.stop()
 
 fruit_list = fruit_df['FRUIT_NAME'].tolist()
 
