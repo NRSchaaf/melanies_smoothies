@@ -14,7 +14,7 @@ st.write('The name on your Smoothie will be:', name_on_order)
 
 # Display smoothiefroot nutrition information
 smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
-st.text(smoothiefroot_response)
+st.text(smoothiefroot_response.json())
 
 # Connect to Snowflake
 cnx = st.connection("snowflake")
